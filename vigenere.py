@@ -1,7 +1,7 @@
 #program that encrypts and decrypts passwords using a user-remembered key and the Vigenere Cypher
 from os import path
 from string import ascii_lowercase as alpha
-from fileops import add_info, get_password, get_contents, write_info, write_blank, sort_file
+from fileops import add_info, get_password, get_contents, write_info, sort_file
 
 def decrypt(file_name):
     account = input("What account is the password for? ")
@@ -46,36 +46,28 @@ def encrypt(file_name):
         encrypted_password += new_char
         #wraps key index if necessary
         key_index = (key_index + 1) % len(key)
-    account = input(f"Encrypted password is {encrypted_password}. What account is this for? (If multiple accounts, separate with commas): ")
+    account = input(f"Encrypted password is {encrypted_password}. What account is this for? ")
     #write account-salted pair to the file specifiec
     add_info(file_name, account.upper(), encrypted_password)
     sort_file(file_name)
     print("Password successfully encrypted")
 
-#deletes the account and password for the account specified
-#if the account's password has multiple accounts tied to it, only removes this account
-#if there are no accounts in file or no password for specified account, this method does nothing
+#don't have to sort it because file line relative order is preserved
+#if the account specified doesn't have an entry, this method does nothing
 def delete(file_name):
     del_account = input("What is the name of the account you want to delete? ").upper()
     #reads all of file's contents into list
     file_lines = get_contents(file_name)
-    #goes through each line in file
+    #goes through each line in file and 
     for line in file_lines:
-        account_string, password = line.split("-")
-        accounts = account_string.split(",")
-        #splits line into accounts and passwords, then loops through each account (if multiple)
-        for curr_account in accounts:
-            if curr_account == del_account:
-                accounts.remove(curr_account)
-        #if there were multiple accounts for this password file still shows the other ones
-        if len(accounts) > 0:
-            write_info(file_name, accounts, password)
-        #"writes" over the line on the file by replacing it with an empty string
-        else:
-            write_blank(file_name)
-    #sort_file(file_name)
+        account, password = line.strip().split("-")
+        #if the account is the delete account, delete the entire line from the list of file lines
+        if account == del_account:
+            file_lines.remove(line)
+    #rewrite all the remaining lines
+    write_info(file_name, file_lines)
 
-#updates the account/s, password (with or without same key), or key
+#updates the account's, password (with or without same key), or key
 def update(file_name):
     pass
 
@@ -86,7 +78,6 @@ if __name__ == "__main__":
     if not path.exists(file_name):
         print("File not found. Aborting program")
         quit()
-
     #main loop of program
     while True:
         operation = input("Do you wish to encrypt, decrypt, delete an account, update info for an account (CURRENTLY NOT IMPLEMENTED), or quit the program? ").lower()
