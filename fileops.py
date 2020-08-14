@@ -29,9 +29,19 @@ def write_info(file_name, accounts, encrypted_password):
     with open(file_name, "w") as f:
         #if multiple accounts, join them with a comma
         f.write(",".join(accounts) + "-" + encrypted_password + "\n")
+        
 
 #to "delete" an account, actually just write an empty string
 #only important if account deleted is the only account
 def write_blank(file_name):
     with open(file_name, "w") as f:
         f.write("")
+
+#sorts the contents of the file alphabetically
+#called at the end of the methods that add new entries to the file
+def sort_file(file_name):
+    with open(file_name, "r") as f:
+        lines = f.readlines();
+        sorted_lines = sorted(lines)
+    with open(file_name, "w") as f:
+        f.writelines(sorted_lines)

@@ -1,7 +1,7 @@
 #program that encrypts and decrypts passwords using a user-remembered key and the Vigenere Cypher
 from os import path
 from string import ascii_lowercase as alpha
-from fileops import add_info, get_password, get_contents, write_info, write_blank
+from fileops import add_info, get_password, get_contents, write_info, write_blank, sort_file
 
 def decrypt(file_name):
     account = input("What account is the password for? ")
@@ -49,6 +49,7 @@ def encrypt(file_name):
     account = input(f"Encrypted password is {encrypted_password}. What account is this for? (If multiple accounts, separate with commas): ")
     #write account-salted pair to the file specifiec
     add_info(file_name, account.upper(), encrypted_password)
+    sort_file(file_name)
     print("Password successfully encrypted")
 
 #deletes the account and password for the account specified
@@ -72,6 +73,7 @@ def delete(file_name):
         #"writes" over the line on the file by replacing it with an empty string
         else:
             write_blank(file_name)
+    #sort_file(file_name)
 
 #updates the account/s, password (with or without same key), or key
 def update(file_name):
