@@ -71,16 +71,34 @@ def delete(file_name):
 def update(file_name):
     pass
 
+
+#prints the valid operations
+def print_operations():
+    print("\n---- Available operations ----")
+    print("> \"encrypt\" -- links an encrypted password to an account using a user-specified key")
+    print("> \"decrypt\" -- decrypts a stored password after given a user-specified account and key")
+    print("> \"delete\" -- deletes a user-specified account from the file")
+    print("> \"update\" -- updates the password for a user-specified account")
+    print("> \"list\" -- alphabetically lists all accounts current in the file")
+    print("> \"quit\" -- exits the program\n")
+
+#prints the starting program info
+def print_starting_info():
+    print("This is a basic password encryption/decryption program that uses the vigenere cipher.")
+    print("The cipher uses a memorized key that is used in encryption and decryption.")
+
 #"main" portion of code
 if __name__ == "__main__":
-    file_name = input("What is the name of the storage file? ")
+    print_starting_info()
+    file_name = input("What is the name of the storage file? (if not in the same directory as this file, please provide the entire filepath): ")
+    print_operations()
     #checks to make sure the file given exists
     if not path.exists(file_name):
         print("File not found. Aborting program")
         quit()
     #main loop of program
     while True:
-        operation = input("Do you wish to encrypt, decrypt, delete an account, update info for an account (CURRENTLY NOT IMPLEMENTED), or quit the program? ").lower()
+        operation = input("Please type the operation you wish to perform, or \"help\" to see them listed: ").lower()
         if operation == "decrypt":
             decrypt(file_name)
         elif operation == "encrypt":
@@ -89,6 +107,8 @@ if __name__ == "__main__":
             delete(file_name)
         elif operation == "update":
             update(file_name)
+        elif operation == "help":
+            print_operations()
         elif operation == "quit":
             print("Quitting program...")
             break
