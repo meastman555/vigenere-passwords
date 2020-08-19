@@ -9,7 +9,7 @@ def decrypt(file_name):
     #gets associated password from this account, if one exists
     encrypted_password = get_password(file_name, account.upper());
     if encrypted_password == None:
-        print("No encrypted password for this account exists")
+        print("> No encrypted password for this account exists")
     else:
         key = input("What is the key that will be used to decrypt? ")
         plain_text = ""
@@ -27,14 +27,20 @@ def decrypt(file_name):
             plain_text += old_char
             #wraps the key index the same way as encryption
             key_index = (key_index + 1) % len(key)
-        print(f"The decrypted password is \"{plain_text}\"")
+        print(f"> The decrypted password is \"{plain_text}\"")
 
 def encrypt(file_name):
-    plain_text = input("What is the password you wish to encrypt? ")
-    key = input("What is the key that will be used to encrypt? ").lower()
-    do_encrypt(file_name, plain_text, key)
+    account = input("What account will the password be for? ").upper()
+    #checks to make sure the file doesn't already have this account
+    if account_present(file_name, account):
+        print("> Account already exists in file, encryption aborted (try updating your password instead)")
+    else:
+        plain_text = input("What is the password you wish to encrypt? ")
+        key = input("What is the key that will be used to encrypt? ").lower()
+        do_encrypt(file_name, account, plain_text, key)
+        print("> Password succesfully encrypted")
 
-def do_encrypt(file_name, plain_text, key):
+def do_encrypt(file_name, account, plain_text, key):
     encrypted_password = ""
     key_index = 0
     for curr_char in plain_text:
@@ -50,22 +56,16 @@ def do_encrypt(file_name, plain_text, key):
         encrypted_password += new_char
         #wraps key index if necessary
         key_index = (key_index + 1) % len(key)
-    account = input(f"Encrypted password is {encrypted_password}. What account is this for? ").upper()
-    #checks to make sure the file doesn't already have this account
-    if not account_present(file_name, account):
-        #write account-salted pair to the file specified
-        add_info(file_name, account, encrypted_password)
-        sort_file(file_name)
-        print("Password successfully encrypted")
-    else:
-        print("Account already exists in the file, encryption aborted (try updating your password instead)")
+    #write account-salted pair to the file specified
+    add_info(file_name, account, encrypted_password)
+    sort_file(file_name)
 
 #don't have to sort it because file line relative order is preserved
 #if the account specified isn't present in the file, this method does nothing
 def delete(file_name):
     del_account = input("What is the name of the account you want to delete? ").upper()
     do_delete(file_name, del_account)
-    print("Account successfully deleted")
+    print("> Account successfully deleted")
 
 def do_delete(file_name, del_account):
     #reads all of file's contents into list
@@ -81,12 +81,12 @@ def do_delete(file_name, del_account):
 
 #updates the account's, password (with or without same key), or key
 def update(file_name):
-    update_account = input("What is the account you wish to update? ")
+    update_account = input("What is the account you wish to update? ").upper()
     new_password = input("What is the new password you want to give this account? ")
     key = input("What is the key you wish to encrypt this password with? ")
-    do_delete(file_name, update_account.upper())
-    do_encrypt(file_name, new_password, key)
-    print("Password successfully updated")
+    do_delete(file_name, update_account)
+    do_encrypt(file_name, update_account, new_password, key)
+    print("> Password successfully updated")
 
 #lists all accounts in the file
 def list_accounts(file_name):
