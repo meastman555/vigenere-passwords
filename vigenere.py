@@ -1,7 +1,8 @@
 #program that encrypts and decrypts passwords using a user-remembered key and the Vigenere Cypher
+
 from os import path
 from string import ascii_lowercase as alpha
-from fileops import add_info, get_password, get_contents, write_info, sort_file
+from fileops import add_info, get_password, get_contents, write_info, sort_file, account_present
 
 def decrypt(file_name):
     account = input("What account is the password for? ")
@@ -31,6 +32,9 @@ def decrypt(file_name):
 def encrypt(file_name):
     plain_text = input("What is the password you wish to encrypt? ")
     key = input("What is the key that will be used to encrypt? ").lower()
+    do_encrypt(file_name, plain_text, key)
+
+def do_encrypt(file_name, plain_text, key):
     encrypted_password = ""
     key_index = 0
     for curr_char in plain_text:
@@ -46,16 +50,24 @@ def encrypt(file_name):
         encrypted_password += new_char
         #wraps key index if necessary
         key_index = (key_index + 1) % len(key)
-    account = input(f"Encrypted password is {encrypted_password}. What account is this for? ")
-    #write account-salted pair to the file specifiec
-    add_info(file_name, account.upper(), encrypted_password)
-    sort_file(file_name)
-    print("Password successfully encrypted")
+    account = input(f"Encrypted password is {encrypted_password}. What account is this for? ").upper()
+    #checks to make sure the file doesn't already have this account
+    if not account_present(file_name, account):
+        #write account-salted pair to the file specified
+        add_info(file_name, account, encrypted_password)
+        sort_file(file_name)
+        print("Password successfully encrypted")
+    else:
+        print("Account already exists in the file, encryption aborted (try updating your password instead)")
 
 #don't have to sort it because file line relative order is preserved
-#if the account specified doesn't have an entry, this method does nothing
+#if the account specified isn't present in the file, this method does nothing
 def delete(file_name):
     del_account = input("What is the name of the account you want to delete? ").upper()
+    do_delete(file_name, del_account)
+    print("Account successfully deleted")
+
+def do_delete(file_name, del_account):
     #reads all of file's contents into list
     file_lines = get_contents(file_name)
     #goes through each line in file and 
@@ -69,8 +81,19 @@ def delete(file_name):
 
 #updates the account's, password (with or without same key), or key
 def update(file_name):
-    pass
+    update_account = input("What is the account you wish to update? ")
+    new_password = input("What is the new password you want to give this account? ")
+    key = input("What is the key you wish to encrypt this password with? ")
+    do_delete(file_name, update_account.upper())
+    do_encrypt(file_name, new_password, key)
+    print("Password successfully updated")
 
+#lists all accounts in the file
+def list_accounts(file_name):
+    lines = get_contents(file_name)
+    for line in lines:
+        account, password = line.split("-")
+        print(f"> {account.capitalize()}")
 
 #prints the valid operations
 def print_operations():
@@ -82,20 +105,16 @@ def print_operations():
     print("> \"list\" -- alphabetically lists all accounts current in the file")
     print("> \"quit\" -- exits the program\n")
 
-#prints the starting program info
-def print_starting_info():
-    print("This is a basic password encryption/decryption program that uses the vigenere cipher.")
-    print("The cipher uses a memorized key that is used in encryption and decryption.")
-
 #"main" portion of code
 if __name__ == "__main__":
-    print_starting_info()
+    print("This is a basic, yet secure password encryption/decryption program that uses the vigenere cipher.")
+    print("The cipher uses a user-memorized key for the algorithm.")    
     file_name = input("What is the name of the storage file? (if not in the same directory as this file, please provide the entire filepath): ")
-    print_operations()
     #checks to make sure the file given exists
     if not path.exists(file_name):
         print("File not found. Aborting program")
         quit()
+    print_operations()
     #main loop of program
     while True:
         operation = input("Please type the operation you wish to perform, or \"help\" to see them listed: ").lower()
@@ -109,6 +128,8 @@ if __name__ == "__main__":
             update(file_name)
         elif operation == "help":
             print_operations()
+        elif operation == "list":
+            list_accounts(file_name)
         elif operation == "quit":
             print("Quitting program...")
             break

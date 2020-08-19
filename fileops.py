@@ -35,3 +35,15 @@ def sort_file(file_name):
         sorted_lines = sorted(lines)
     with open(file_name, "w") as f:
         f.writelines(sorted_lines)
+
+#checks to see whether the account passed already has an entry in the account
+#returns true if already present, false if missing
+def account_present(file_name, account):
+    with open(file_name, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            curr_account, password = line.split("-")
+            if curr_account == account:
+                return True
+        return False
+
